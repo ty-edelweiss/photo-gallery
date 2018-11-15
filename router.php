@@ -3,7 +3,7 @@
 $CONFIG = [
     'cache_file' => 'cache.bin',
     'cache_life' => 1800,
-    'cache_limit' => 1000,
+    'cache_limit' => 600,
 ];
 
 function cacheing($assets) {
@@ -24,8 +24,10 @@ function cacheing($assets) {
 
 function cache_handler($assets) {
     global $CONFIG;
-    if (is_file($CONFIG['cache_file']) && filectime($CONFIG['cache_file']) < $CONFIG['cache_life']) {
-        $cache = unserialize(file_get_contents($CONFIG['cache_file'], FILE_USE_INCLUDE_PATH));
+    $cache_file = $CONFIG['cache_file'];
+    $cache_time = time() - filemtime($CONFIG['cache_file']);
+    if (is_file($cache_file) && $cache_time < $CONFIG['cache_life']) {
+        $cache = unserialize(file_get_contents($cache_file, FILE_USE_INCLUDE_PATH));
         if (!array_key_exists($assets, $cache)) {
             $cache = cacheing($assets);
         }
