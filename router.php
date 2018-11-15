@@ -10,11 +10,13 @@ function cacheing($assets) {
     global $CONFIG;
     $assets_path = implode('/', [$assets, '*.jpg']);
     $tmp = glob($assets_path);
+    $total = count($tmp);
+    $random = $total > $CONFIG["cache_limit"] ? rand(0, $total - $CONFIG["cache_limit"]) : 0;
     $cache = [
-        'total' => count($tmp),
+        'total' => $total,
         $assets => array_map(function ($path) use ($assets) {
             return substr($path, strlen($assets) + 1, -4);
-        }, array_slice($tmp, 0, $CONFIG["cache_limit"]))
+        }, array_slice($tmp, $random, $CONFIG["cache_limit"]))
     ];
     file_put_contents($CONFIG['cache_file'], serialize($cache), LOCK_EX);
     return $cache;
