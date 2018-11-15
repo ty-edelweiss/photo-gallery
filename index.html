@@ -149,9 +149,9 @@
                 photos = photos + max_chunk;
             };
             $(window).on("scroll", function(){
-                var docHeight = $(document).innerHeight()
-                    windowHeight = $(window).innerHeight()
-                    pageBottom = docHeight - windowHeight;
+                var docHeight = $(document).innerHeight();
+                var windowHeight = $(window).innerHeight();
+                var pageBottom = docHeight - windowHeight;
                 if(pageBottom <= $(window).scrollTop()) {
                     fetch_photos();
                 }
