@@ -6,6 +6,8 @@
         <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
         <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/js/modaal.min.js" integrity="sha256-e8kfivdhut3LQd71YXKqOdkWAG1JKiOs2hqYJTe0uTk=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/css/modaal.min.css" integrity="sha256-uXhoVqsazfMtamqLl8uOpYKcZ7bRUZWDmoLcPOpeApw=" crossorigin="anonymous" />
         <style>
             * { box-sizing: border-box; }
             html {
@@ -13,10 +15,7 @@
                 overflow-y: scroll;
             }
             .container {
-                background-color: #dddddd;
-            }
-            .grid {
-                height: 100% ! important;
+                background: #ddd;
             }
             /* clear fix */
             .grid:after {
@@ -33,12 +32,16 @@
             .grid-item img {
                 display: block;
                 max-width: 100%;
+                min-width: 100%;
             }
             .loading {
                 height: 60px;
                 width: 100%;
                 text-align: center;
                 padding-top: 10px;
+            }
+            h1.title {
+                margin: 0;
             }
             nav {
                 display: table;
@@ -48,28 +51,35 @@
                 text-align: center;
                 display: inline-block;
             }
-            a {
+            a.btn {
                 display: table-cell;
                 vertical-align: middle;
                 text-align: center;
                 width: 120px;
-                background-color: #dddddd;
+                background-color: #ddd;
                 box-shadow: 0 5px 0 darkred;
                 color: #ffffff;
                 padding: 1em 1.5em;
                 text-decoration: none;
                 text-transform: uppercase;
             }
-            a:hover {
+            a.btn:hover {
                 background-color: #ce0606;
                 cursor: pointer;
             }
-            a:active {
+            a.btn:active {
                 box-shadow: none;
                 top: 5px;
             }
-            a.active {
+            a.btn.active {
                 background-color: #ce0606;
+            }
+            a.gallery {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
             }
         </style>
     </head>
@@ -104,21 +114,23 @@
             var $grid = $(".grid").masonry({
                 itemSelector: ".grid-item",
                 percentPosition: true,
-                columWidth: ".grid-sizer"
+                columWidth: ".grid-sizer",
             });
             var fetch_meta = function (json) {
-                var images = json.ids.map(function (id) {
-                    var div = $("<div></div>");
-                    div.addClass("grid-item");
-                    var img = $("<img/>");
+                json.ids.forEach(function (id, index, array) {
                     var payload = { assets: year, method: "image", id: id };
-                    img.attr("src", location.pathname + "?" + $.param(payload));
-                    return div.append(img);
-                });
-                $grid.append(images).masonry("appended", images);
-                $grid.imagesLoaded(function () {
-                    $grid.masonry("layout");
-                    $(".loading").css("display", "none");
+                    var uri = location.pathname + "?" + $.param(payload);
+                    var img = $("<img />").attr("src", uri);
+                    var $anchor = $("<a data-group=\"gallery\" class=\"gallery\"></a>").attr("href", uri);
+                    var $image = $("<div class=\"grid-item\"></div>").append($anchor).append(img);
+                    $anchor.modaal({ type: "image" });
+                    $grid.append($image).masonry("appended", $image);
+                    $grid.imagesLoaded(function () {
+                        $grid.masonry("layout");
+                        if (index == array.length - 1) {
+                            $(".loading").css("display", "none");
+                        }
+                    });
                 });
             };
             var fetch_photos = function () {
@@ -145,7 +157,7 @@
                 }
             });
             $(document).ready(function ($) {
-                var init_loop = 3;
+                var init_loop = 4;
                 for (var i = 0; i < init_loop; i++) {
                     fetch_photos();
                 }

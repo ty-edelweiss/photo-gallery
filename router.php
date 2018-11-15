@@ -63,7 +63,7 @@ function http_handler($uri, $assets, $cache, $assets_list) {
     $html = preg_replace('/\{total\}/', $cache['total'], $html);
     $btns = array_map(function ($val) use ($assets) {
         $cls = $assets == $val ? 'active' : '';
-        return "<li><a class=\"{$cls}\" href=\"./index.html?assets={$val}\">{$val}</a></li>";
+        return "<li><a class=\"btn {$cls}\" href=\"./index.html?assets={$val}\">{$val}</a></li>";
     }, $assets_list);
     echo preg_replace('/\{buttons\}/', implode(PHP_EOL, $btns), $html);
 }
