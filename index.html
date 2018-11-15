@@ -68,6 +68,9 @@
                 box-shadow: none;
                 top: 5px;
             }
+            a.active {
+                background-color: #ce0606;
+            }
         </style>
     </head>
     <body>
@@ -96,9 +99,8 @@
             </div>
         </div>
         <script type="text/javascript" charset="UTF-8">
-            var year = $(".title").text().split(" ")[1];
-            console.log(year);
             var photos = 0;
+            var year = $(".title").text().split(" ")[1];
             var $grid = $(".grid").masonry({
                 itemSelector: ".grid-item",
                 percentPosition: true,

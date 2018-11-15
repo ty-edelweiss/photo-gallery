@@ -9,10 +9,15 @@ $CONFIG = [
 function cacheing($assets) {
     global $CONFIG;
     $assets_path = implode('/', [$assets, '*.jpg']);
-    $assets_data = array_slice(glob($assets_path), 0, $CONFIG['cache_limit']);
-    return array_map(function ($path) use ($assets) {
-        return substr($path, strlen($assets) + 1, -4);
-    }, $assets_data);
+    $tmp = glob($assets_path);
+    $cache = [
+        'total' => count($tmp),
+        $assets => array_map(function ($path) use ($assets) {
+            return substr($path, strlen($assets) + 1, -4);
+        }, array_slice($tmp, 0, $CONFIG["cache_limit"]))
+    ];
+    file_put_contents($CONFIG['cache_file'], serialize($cache), LOCK_EX);
+    return $cache;
 }
 
 function cache_handler($assets) {
@@ -20,12 +25,10 @@ function cache_handler($assets) {
     if (is_file($CONFIG['cache_file']) && filectime($CONFIG['cache_file']) < $CONFIG['cache_life']) {
         $cache = unserialize(file_get_contents($CONFIG['cache_file'], FILE_USE_INCLUDE_PATH));
         if (!array_key_exists($assets, $cache)) {
-            $cache = [$assets => cacheing($assets)];
-            file_put_contents($CONFIG['cache_file'], serialize($cache), LOCK_EX);
+            $cache = cacheing($assets);
         }
     } else {
-        $cache = [$assets => cacheing($assets)];
-        file_put_contents($CONFIG['cache_file'], serialize($cache), LOCK_EX);
+        $cache = cacheing($assets);
     }
     return $cache;
 }
@@ -53,9 +56,10 @@ function api_handler($method, $assets, $cache) {
 function http_handler($uri, $assets, $cache, $assets_list) {
     $html = file_get_contents($uri, FILE_USE_INCLUDE_PATH);
     $html = preg_replace('/\{year\}/', $assets, $html);
-    $html = preg_replace('/\{total\}/', count($cache[$assets]), $html);
-    $btns = array_map(function ($val) {
-        return "<li><a href=\"./index.html?assets={$val}\">{$val}</a></li>";
+    $html = preg_replace('/\{total\}/', $cache['total'], $html);
+    $btns = array_map(function ($val) use ($assets) {
+        $cls = $assets == $val ? 'active' : '';
+        return "<li><a class=\"{$cls}\" href=\"./index.html?assets={$val}\">{$val}</a></li>";
     }, $assets_list);
     echo preg_replace('/\{buttons\}/', implode(PHP_EOL, $btns), $html);
 }
