@@ -59,13 +59,13 @@ function api_handler($method, $assets, $cache) {
 
 function http_handler($uri, $assets, $cache, $assets_list) {
     $html = file_get_contents($uri, FILE_USE_INCLUDE_PATH);
-    $html = preg_replace('/\{year\}/', $assets, $html);
-    $html = preg_replace('/\{total\}/', $cache['total'], $html);
     $btns = array_map(function ($val) use ($assets) {
         $cls = $assets == $val ? 'active' : '';
         return "<li><a class=\"btn {$cls}\" href=\"./index.html?assets={$val}\">{$val}</a></li>";
     }, $assets_list);
-    echo preg_replace('/\{buttons\}/', implode(PHP_EOL, $btns), $html);
+    $search = ['/\{year\}/', '/\{total\}/', '/\{buttons\}/'];
+    $replace = [$assets, $cache['total'], implode(PHP_EOL, $btns)];
+    echo preg_replace($search, $replace, $html);
 }
 
 if (preg_match('/^\/index\.html\?*.*$/', $_SERVER["REQUEST_URI"])) {
@@ -85,4 +85,5 @@ if (preg_match('/^\/index\.html\?*.*$/', $_SERVER["REQUEST_URI"])) {
 } else {
     header('Location: /index.html');
 }
+
 ?>
