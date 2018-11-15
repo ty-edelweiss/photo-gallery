@@ -1,6 +1,6 @@
 # Photo Gallery
 
-This project is vary simple. only single files exsit.
+This project is vary simple. only single file exsit.
 
 Our goal is to display photos simply and automatically.
 
