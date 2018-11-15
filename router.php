@@ -3,13 +3,16 @@
 $CONFIG = [
     'cache_file' => 'cache.bin',
     'cache_life' => 1800,
+    'cache_limit' => 1000,
 ];
 
 function cacheing($assets) {
+    global $CONFIG;
     $assets_path = implode('/', [$assets, '*.jpg']);
+    $assets_data = array_slice(glob($assets_path), 0, $CONFIG['cache_limit']);
     return array_map(function ($path) use ($assets) {
         return substr($path, strlen($assets) + 1, -4);
-    }, glob($assets_path));
+    }, $assets_data);
 }
 
 function cache_handler($assets) {
@@ -37,7 +40,7 @@ function api_handler($method, $assets, $cache) {
     case 'meta':
         header("Content-Type: application/json");
         $meta = [ 'method' => $method, 'status' => TRUE ];
-        $meta['id'] = array_slice($cache[$assets], $_GET["offset"], $_GET["length"]);
+        $meta['ids'] = array_slice($cache[$assets], $_GET["offset"], $_GET["length"]);
         echo json_encode($meta);
         break;
     default:
@@ -51,12 +54,8 @@ function http_handler($uri, $assets, $cache, $assets_list) {
     $html = file_get_contents($uri, FILE_USE_INCLUDE_PATH);
     $html = preg_replace('/\{year\}/', $assets, $html);
     $html = preg_replace('/\{total\}/', count($cache[$assets]), $html);
-    $btns = array_map(function ($val) { 
-        return <<< EOF
-<form method="GET" action="./index.html?assets={$val}">
-    <button class="btn-hover">{$val}</button>
-</form>
-EOF;
+    $btns = array_map(function ($val) {
+        return "<li><a href=\"./index.html?assets={$val}\">{$val}</a></li>";
     }, $assets_list);
     echo preg_replace('/\{buttons\}/', implode(PHP_EOL, $btns), $html);
 }

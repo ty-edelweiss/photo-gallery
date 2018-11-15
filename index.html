@@ -13,9 +13,7 @@
                 overflow-y: scroll;
             }
             .container {
-                background: #ef32d9;  /* fallback for old browsers */
-                background: -webkit-linear-gradient(to right, #89fffd, #ef32d9);  /* Chrome 10-25, Safari 5.1-6 */
-                background: linear-gradient(to right, #89fffd, #ef32d9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+                background-color: #dddddd;
             }
             .grid {
                 height: 100% ! important;
@@ -43,52 +41,37 @@
                 padding-top: 10px;
             }
             nav {
-                margin-bottom: 20px;
-                list-style: none;
+                display: table;
             }
-            nav form {
-                width: 180px;
+            nav li {
+                width: 122px;
                 text-align: center;
                 display: inline-block;
             }
-            button {
-                -webkit-box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                box-sizing: border-box;
+            a {
+                display: table-cell;
+                vertical-align: middle;
+                text-align: center;
+                width: 120px;
+                background-color: #dddddd;
+                box-shadow: 0 5px 0 darkred;
+                color: #ffffff;
+                padding: 1em 1.5em;
+                text-decoration: none;
+                text-transform: uppercase;
             }
-            button.btn-hover {
-                width: 140px;
-                font-size: 16px;
-                font-weight: 600;
-                color: #fff;
+            a:hover {
+                background-color: #ce0606;
                 cursor: pointer;
-                margin: 10px;
-                height: 40px;
-                text-align:center;
-                border: none;
-                background-size: 300% 100%;
-                border-radius: 50px;
-                moz-transition: all .4s ease-in-out;
-                -o-transition: all .4s ease-in-out;
-                -webkit-transition: all .4s ease-in-out;
-                transition: all .4s ease-in-out;
-                background-image: linear-gradient(to right, #667eea, #764ba2, #6B8DD6, #8E37D7);
-                box-shadow: 0 4px 15px 0 rgba(116, 79, 168, 0.75);
             }
-            button.btn-hover:hover {
-                background-position: 100% 0;
-                moz-transition: all .4s ease-in-out;
-                -o-transition: all .4s ease-in-out;
-                -webkit-transition: all .4s ease-in-out;
-                transition: all .4s ease-in-out;
-            }
-            button.btn-hover:focus {
-                outline: none;
+            a:active {
+                box-shadow: none;
+                top: 5px;
             }
         </style>
     </head>
     <body>
-        <h1>Photos {year}</h1>
+        <h1 class="title">Photos {year}</h1>
         <p class="status">Sample Status: all {total} photos</p>
         <nav class="header">
             {buttons}
@@ -113,19 +96,21 @@
             </div>
         </div>
         <script type="text/javascript" charset="UTF-8">
+            var year = $(".title").text().split(" ")[1];
+            console.log(year);
+            var photos = 0;
             var $grid = $(".grid").masonry({
                 itemSelector: ".grid-item",
                 percentPosition: true,
                 columWidth: ".grid-sizer"
             });
-            var photos = 0;
             var fetch_meta = function (json) {
-                var images = json.id.map(function (id) {
+                var images = json.ids.map(function (id) {
                     var div = $("<div></div>");
                     div.addClass("grid-item");
                     var img = $("<img/>");
-                    var payload = { method: "image", id: id };
-                    img.attr("src", location.href + "?" + $.param(payload));
+                    var payload = { assets: year, method: "image", id: id };
+                    img.attr("src", location.pathname + "?" + $.param(payload));
                     return div.append(img);
                 });
                 $grid.append(images).masonry("appended", images);
@@ -138,7 +123,7 @@
                 var max_chunk = 4;
                 $.ajax({
                     type: "GET",
-                    url: location.pathname,
+                    url: location.pathname + location.search,
                     data: { method: "meta", offset: photos, length : max_chunk },
                     dataType: "json",
                     beforeSend: function (){ $(".loading > img").css("display", "block"); },
