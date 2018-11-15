@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Photos Gallelry</title>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+        <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+        <style>
+            * { box-sizing: border-box; }
+            html {
+                font-family: Arial, Helvetica;
+                overflow-y: scroll;
+            }
+            .container {
+                background: #ef32d9;  /* fallback for old browsers */
+                background: -webkit-linear-gradient(to right, #89fffd, #ef32d9);  /* Chrome 10-25, Safari 5.1-6 */
+                background: linear-gradient(to right, #89fffd, #ef32d9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+            }
+            .grid {
+                height: 100% ! important;
+            }
+            /* clear fix */
+            .grid:after {
+                content: '';
+                display: block;
+                clear: both;
+            }
+            .grid-item, .grid-sizer {
+                width: 25%;
+            }
+            .grid-item {
+                float: left;
+            }
+            .grid-item img {
+                display: block;
+                max-width: 100%;
+            }
+            .loading {
+                height: 60px;
+                width: 100%;
+                text-align: center;
+                padding-top: 10px;
+            }
+            nav {
+                margin-bottom: 20px;
+                list-style: none;
+            }
+            nav li {
+                width: 180px;
+                text-align: center;
+                display: inline-block;
+            }
+            button {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            button.btn-hover {
+                width: 140px;
+                font-size: 16px;
+                font-weight: 600;
+                color: #fff;
+                cursor: pointer;
+                margin: 10px;
+                height: 40px;
+                text-align:center;
+                border: none;
+                background-size: 300% 100%;
+                border-radius: 50px;
+                moz-transition: all .4s ease-in-out;
+                -o-transition: all .4s ease-in-out;
+                -webkit-transition: all .4s ease-in-out;
+                transition: all .4s ease-in-out;
+                background-image: linear-gradient(to right, #667eea, #764ba2, #6B8DD6, #8E37D7);
+                box-shadow: 0 4px 15px 0 rgba(116, 79, 168, 0.75);
+            }
+            button.btn-hover:hover {
+                background-position: 100% 0;
+                moz-transition: all .4s ease-in-out;
+                -o-transition: all .4s ease-in-out;
+                -webkit-transition: all .4s ease-in-out;
+                transition: all .4s ease-in-out;
+            }
+            button.btn-hover:focus {
+                outline: none;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Photos {year}</h1>
+        <p class="status">Sample Status: all {total} photos</p>
+        <nav class="header">
+            <li><button href="/index.html" class="btn-hover">2017</button></li>
+            <li><button href="/index.html" class="btn-hover">2016</button></li>
+            <li><button href="/index.html" class="btn-hover">2015</button></li>
+        </nav>
+        <div class="container">
+            <div class="grid">
+                <div class="grid-sizer"></div>
+            </div>
+            <div class="loading">
+                <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                                                                                                                       width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+                    <path fill="#000" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
+                    <animateTransform attributeType="xml"
+                                      attributeName="transform"
+                                      type="rotate"
+                                      from="0 25 25"
+                                      to="360 25 25"
+                                      dur="0.6s"
+                                      repeatCount="indefinite"/>
+                    </path>
+                </svg>
+            </div>
+        </div>
+        <script type="text/javascript" charset="UTF-8">
+            var $grid = $(".grid").masonry({
+                itemSelector: ".grid-item",
+                percentPosition: true,
+                columWidth: ".grid-sizer"
+            });
+            var photos = 0;
+            var fetch_meta = function (json) {
+                var images = json.id.map(function (id) {
+                    var div = $("<div></div>");
+                    div.addClass("grid-item");
+                    var img = $("<img/>");
+                    var payload = { method: "image", id: id };
+                    img.attr("src", location.href + "?" + $.param(payload));
+                    return div.append(img);
+                });
+                $grid.append(images).masonry("appended", images);
+                $grid.imagesLoaded(function () {
+                    $grid.masonry("layout");
+                    $(".loading").css("display", "none");
+                });
+            };
+            var fetch_photos = function () {
+                var max_chunk = 4;
+                $.ajax({
+                    type: "GET",
+                    url: location.pathname,
+                    data: { method: "meta", offset: photos, length : max_chunk },
+                    dataType: "json",
+                    beforeSend: function (){ $(".loading > img").css("display", "block"); },
+                    success: fetch_meta,
+                    error: function (err) {
+                        console.log("Some errors occured!");
+                    }
+                });
+                photos = photos + max_chunk;
+            };
+            $(window).on("scroll", function(){
+                var docHeight = $(document).innerHeight()
+                    windowHeight = $(window).innerHeight()
+                    pageBottom = docHeight - windowHeight;
+                if(pageBottom <= $(window).scrollTop()) {
+                    fetch_photos();
+                }
+            });
+            $(document).ready(function ($) {
+                var init_loop = 3;
+                for (var i = 0; i < init_loop; i++) {
+                    fetch_photos();
+                }
+            });
+        </script>
+    </body>
+</html>
