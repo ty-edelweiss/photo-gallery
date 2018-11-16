@@ -8,7 +8,7 @@ Our goal is to display photos simply and automatically.
 
 Just download the single php script from my release page. And then, execute the following command.
 
-To be displayed, your photos should get together in a directory.
+To be displayed, your photos should be put together in a directory.
 and, this photo collection should be placed on the same directory where the script exists.
 Multiple photo collections can be displayed.
 
