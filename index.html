@@ -8,10 +8,11 @@
         <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/js/modaal.min.js" integrity="sha256-e8kfivdhut3LQd71YXKqOdkWAG1JKiOs2hqYJTe0uTk=" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Modaal/0.4.4/css/modaal.min.css" integrity="sha256-uXhoVqsazfMtamqLl8uOpYKcZ7bRUZWDmoLcPOpeApw=" crossorigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
         <style>
             * { box-sizing: border-box; }
             html {
-                font-family: Arial, Helvetica;
+                font-family: 'Roboto', Arial, Helvetica, sans-serif;
                 overflow-y: scroll;
             }
             .container {
@@ -41,6 +42,7 @@
                 padding-top: 10px;
             }
             h1.title {
+                font-size: 3em;
                 margin: 0;
             }
             nav {
@@ -85,7 +87,7 @@
     </head>
     <body>
         <h1 class="title">Photos {year}</h1>
-        <p class="status">Sample Status: all {total} photos</p>
+        <p class="status">Gallery Status: all {total} photos</p>
         <nav class="header">
             {buttons}
         </nav>
@@ -117,8 +119,8 @@
                 columWidth: ".grid-sizer",
             });
             var fetch_meta = function (json) {
-                json.ids.forEach(function (id, index, array) {
-                    var payload = { assets: year, method: "image", id: id };
+                json.data.forEach(function (elm, index, array) {
+                    var payload = { assets: year, method: "image", id: elm.id, type: elm.type };
                     var uri = location.pathname + "?" + $.param(payload);
                     var img = $("<img />").attr("src", uri);
                     var $anchor = $("<a data-group=\"gallery\" class=\"gallery\"></a>").attr("href", uri);

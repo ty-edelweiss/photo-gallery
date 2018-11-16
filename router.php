@@ -8,14 +8,14 @@ $CONFIG = [
 
 function cacheing($assets) {
     global $CONFIG;
-    $assets_path = implode('/', [$assets, '*.jpg']);
-    $tmp = glob($assets_path);
+    $tmp = glob(implode('/', [$assets, '*.{jpg,jpeg,png,gif}']), GLOB_BRACE);
     $total = count($tmp);
     $random = $total > $CONFIG["cache_limit"] ? rand(0, $total - $CONFIG["cache_limit"]) : 0;
     $cache = [
         'total' => $total,
         $assets => array_map(function ($path) use ($assets) {
-            return substr($path, strlen($assets) + 1, -4);
+            $fragments = explode('.', $path);
+            return ['id' => substr($fragments[0], strlen($assets) + 1), 'type' => $fragments[1]];
         }, array_slice($tmp, $random, $CONFIG["cache_limit"]))
     ];
     file_put_contents($CONFIG['cache_file'], serialize($cache), LOCK_EX);
@@ -40,14 +40,14 @@ function cache_handler($assets) {
 function api_handler($method, $assets, $cache) {
     switch ($method) {
     case 'image':
-        header("Content-Type: image/jpg");
-        $path = implode('/', [$assets, $_GET["id"] . '.jpg']);
+        header("Content-Type: image/" . $_GET["type"]);
+        $path = implode('/', [$assets, $_GET["id"] . '.' . $_GET["type"]]);
         readfile($path, TRUE);
         break;
     case 'meta':
         header("Content-Type: application/json");
         $meta = [ 'method' => $method, 'status' => TRUE ];
-        $meta['ids'] = array_slice($cache[$assets], $_GET["offset"], $_GET["length"]);
+        $meta['data'] = array_slice($cache[$assets], $_GET["offset"], $_GET["length"]);
         echo json_encode($meta);
         break;
     default:
