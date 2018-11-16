@@ -1,5 +1,6 @@
 # assets directory for images
 **/*.jpg
+**/*.jpeg
 **/*.gif
 **/*.png
 
