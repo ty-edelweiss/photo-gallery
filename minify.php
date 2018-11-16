@@ -16,6 +16,7 @@ $optimized_src = preg_replace(['/<\?php\\n\\n/', '/\\nfunction http_handler\(.*\
 
 $buffer = <<< 'EOL'
 <?php
+ini_set('display_errors', "Off");
 
 $HTML = <<< 'EOM'
 {html}
